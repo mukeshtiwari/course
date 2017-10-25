@@ -30,10 +30,10 @@ Functions that might help
 -- that appear in the given dictionary file.
 anagrams ::
   Chars
-  -> Filename
+  -> FilePath
   -> IO (List Chars)
 anagrams =
-  error "todo"
+  error "todo: Course.Anagrams#anagrams"
 
 -- Compare two strings for equality, ignoring case
 equalIgnoringCase ::
@@ -41,4 +41,4 @@ equalIgnoringCase ::
   -> Chars
   -> Bool
 equalIgnoringCase =
-  error "todo"
+  error "todo: Course.Anagrams#equalIgnoringCase"

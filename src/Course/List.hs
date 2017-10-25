@@ -4,7 +4,8 @@
 {-# LANGUAGE FlexibleInstances #-}
 
 -- + Complete the 10 exercises below by filling out the function bodies.
---   Replace the function bodies (error "todo") with an appropriate solution.
+--   Replace the function bodies (error "todo: ...") with an appropriate
+--   solution.
 -- + These exercises may be done in any order, however:
 --   Exercises are generally increasing in difficulty, though some people may find later exercise easier.
 -- + Bonus for using the provided functions or for using one exercise solution to help solve another.
@@ -12,6 +13,8 @@
 
 module Course.List where
 
+import qualified Control.Applicative as A
+import qualified Control.Monad as M
 import Course.Core
 import Course.Optional
 import qualified System.Environment as E
@@ -23,7 +26,7 @@ import qualified Numeric as N
 -- >>> import Test.QuickCheck
 -- >>> import Course.Core(even, id, const)
 -- >>> import qualified Prelude as P(fmap, foldr)
--- >>> instance Arbitrary a => Arbitrary (List a) where arbitrary = P.fmap (P.foldr (:.) Nil) arbitrary
+-- >>> instance Arbitrary a => Arbitrary (List a) where arbitrary = P.fmap ((P.foldr (:.) Nil) :: ([a] -> List a)) arbitrary
 
 -- BEGIN Helper functions and data types
 
@@ -73,9 +76,12 @@ headOr ::
   -> List a
   -> a
 headOr =
-  error "todo"
+  error "todo: Course.List#headOr"
 
 -- | The product of the elements of a list.
+--
+-- >>> product Nil
+-- 1
 --
 -- >>> product (1 :. 2 :. 3 :. Nil)
 -- 6
@@ -86,7 +92,7 @@ product ::
   List Int
   -> Int
 product =
-  error "todo"
+  error "todo: Course.List#product"
 
 -- | Sum the elements of the list.
 --
@@ -101,7 +107,7 @@ sum ::
   List Int
   -> Int
 sum =
-  error "todo"
+  error "todo: Course.List#sum"
 
 -- | Return the length of the list.
 --
@@ -113,7 +119,7 @@ length ::
   List a
   -> Int
 length =
-  error "todo"
+  error "todo: Course.List#length"
 
 -- | Map the given function on each element of the list.
 --
@@ -128,7 +134,7 @@ map ::
   -> List a
   -> List b
 map =
-  error "todo"
+  error "todo: Course.List#map"
 
 -- | Return elements satisfying the given predicate.
 --
@@ -145,7 +151,7 @@ filter ::
   -> List a
   -> List a
 filter =
-  error "todo"
+  error "todo: Course.List#filter"
 
 -- | Append two lists to a new list.
 --
@@ -164,7 +170,7 @@ filter =
   -> List a
   -> List a
 (++) =
-  error "todo"
+  error "todo: Course.List#(++)"
 
 infixr 5 ++
 
@@ -182,7 +188,7 @@ flatten ::
   List (List a)
   -> List a
 flatten =
-  error "todo"
+  error "todo: Course.List#flatten"
 
 -- | Map a function then flatten to a list.
 --
@@ -199,7 +205,17 @@ flatMap ::
   -> List a
   -> List b
 flatMap =
-  error "todo"
+  error "todo: Course.List#flatMap"
+
+-- | Flatten a list of lists to a list (again).
+-- HOWEVER, this time use the /flatMap/ function that you just wrote.
+--
+-- prop> let types = x :: List (List Int) in flatten x == flattenAgain x
+flattenAgain ::
+  List (List a)
+  -> List a
+flattenAgain =
+  error "todo: Course.List#flattenAgain"
 
 -- | Convert a list of optional values to an optional list of values.
 --
@@ -227,7 +243,7 @@ seqOptional ::
   List (Optional a)
   -> Optional (List a)
 seqOptional =
-  error "todo"
+  error "todo: Course.List#seqOptional"
 
 -- | Find the first element in the list matching the predicate.
 --
@@ -250,7 +266,7 @@ find ::
   -> List a
   -> Optional a
 find =
-  error "todo"
+  error "todo: Course.List#find"
 
 -- | Determine if the length of the given list is greater than 4.
 --
@@ -269,12 +285,15 @@ lengthGT4 ::
   List a
   -> Bool
 lengthGT4 =
-  error "todo"
+  error "todo: Course.List#lengthGT4"
 
 -- | Reverse a list.
 --
 -- >>> reverse Nil
 -- []
+--
+-- >>> take 1 (reverse (reverse largeList))
+-- [1]
 --
 -- prop> let types = x :: List Int in reverse x ++ reverse y == reverse (y ++ x)
 --
@@ -283,7 +302,7 @@ reverse ::
   List a
   -> List a
 reverse =
-  error "todo"
+  error "todo: Course.List#reverse"
 
 -- | Produce an infinite `List` that seeds with the given value at its head,
 -- then runs the given function for subsequent elements
@@ -297,8 +316,7 @@ produce ::
   (a -> a)
   -> a
   -> List a
-produce =
-  error "todo"
+produce f x = x :. produce f (f x)
 
 -- | Do anything other than reverse a list.
 -- Is it even possible?
@@ -313,7 +331,14 @@ notReverse ::
   List a
   -> List a
 notReverse =
-  error "todo"
+  error "todo: Is it even possible?"
+
+---- End of list exercises
+
+largeList ::
+  List Int
+largeList =
+  listh [1..50000]
 
 hlist ::
   List a
@@ -340,13 +365,13 @@ putStrLn =
   P.putStrLn . hlist
 
 readFile ::
-  Filename
+  FilePath
   -> IO Chars
 readFile =
   P.fmap listh . P.readFile . hlist
 
 writeFile ::
-  Filename
+  FilePath
   -> Chars
   -> IO ()
 writeFile n s =
@@ -641,8 +666,8 @@ instance IsString (List Char) where
 type Chars =
   List Char
 
-type Filename =
-  Chars
+type FilePath =
+  List Char
 
 strconcat ::
   [Chars]
@@ -655,6 +680,23 @@ stringconcat ::
   -> P.String
 stringconcat =
   P.concat
+
+show' ::
+  Show a =>
+  a
+  -> List Char
+show' =
+  listh . show
+
+instance P.Functor List where
+  fmap f =
+    listh . P.fmap f . hlist
+
+instance A.Applicative List where
+  (<*>) =
+    M.ap
+  pure =
+    (:. Nil)
 
 instance P.Monad List where
   (>>=) =
